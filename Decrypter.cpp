@@ -7,7 +7,7 @@
 #include <math.h>
 #include <chrono>
 #include <iostream>
-#include <crypt.h>
+
 #include "Decrypter.h"
 
 using namespace std;
@@ -29,7 +29,7 @@ Decrypter::Decrypter(vector<string> pswToCrack, string salt) {
 }
 
 
-vector<long> Decrypter::sequentialBruteforce(int runs)  {
+vector<long> Decrypter::sequentialDecryption(int runs)  {
 
     bool found = false;
     vector<long> times;
@@ -65,8 +65,20 @@ vector<long> Decrypter::sequentialBruteforce(int runs)  {
             singleRunTimes.push_back(elapsed_time.count());
         }
 
-        times.push_back(getMean(singleRunTimes));
+        times.push_back(Decrypter::getMean(singleRunTimes));
     }
 
     return times;
+}
+
+
+
+long Decrypter::getMean(vector<long> times) {
+    long sum = 0;
+
+    for (long t : times) {
+        sum += t;
+    }
+
+    return (long)(sum / times.size());
 }

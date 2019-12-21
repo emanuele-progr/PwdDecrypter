@@ -14,8 +14,8 @@ using namespace std;
 class Decrypter {
 public:
     Decrypter(vector<string> pswToCrack, string salt);
-    vector<long> sequentialBruteforce(int runs);
-    vector<long> parallelBruteforce(int runs, int nThreads);
+    vector<long> sequentialDecryption(int runs);
+    vector<long> parallelDecryption(int runs, int nThreads);
     vector<float> DisplaySpeedup(vector<long> sequentialTimes, vector<long> parallelTimes);
     long getMean(vector<long> values);
 
