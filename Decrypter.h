@@ -16,7 +16,7 @@ public:
     Decrypter(vector<string> pswToCrack, string salt);
     vector<long> sequentialDecryption(int runs);
     vector<long> parallelDecryption(int runs, int nThreads);
-    vector<float> DisplaySpeedup(vector<long> sequentialTimes, vector<long> parallelTimes);
+    vector<float> calcSpeedup(vector<long> sequentialTimes, vector<long> parallelTimes);
     long getMean(vector<long> values);
 
 private:
