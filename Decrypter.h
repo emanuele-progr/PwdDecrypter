@@ -17,7 +17,8 @@ public:
     vector<long> sequentialDecryption(int runs);
     vector<long> parallelDecryption(int runs, int nThreads);
     vector<float> calcSpeedup(vector<long> sequentialTimes, vector<long> parallelTimes);
-    long getMean(vector<long> values);
+    float getMean(vector<float> values);
+    float getMedian(vector<float> values);
 
 private:
     vector<string> encryptedPasswords;

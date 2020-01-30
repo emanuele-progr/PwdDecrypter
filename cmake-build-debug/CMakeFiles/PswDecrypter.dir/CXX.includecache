@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/emanuele/CLionProjects/PswDecrypter/Decrypter.h
+fstream
+-
+vector
+-
+string
+-
+
+/home/emanuele/CLionProjects/PswDecrypter/main.cpp
+iostream
+-
+vector
+-
+iomanip
+-
+unistd.h
+-
+algorithm
+-
+Decrypter.h
+/home/emanuele/CLionProjects/PswDecrypter/Decrypter.h
+
