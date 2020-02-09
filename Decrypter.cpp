@@ -1,5 +1,5 @@
 //
-// Created by Emanuele on 21/12/2019.
+// Created by Emanuele on 11/12/2019.
 //
 #include <stdexcept>
 #include <string.h>
@@ -7,9 +7,9 @@
 #include <math.h>
 #include <crypt.h>
 #include <chrono>
-#include <iostream>
 #include <unistd.h>
 #include <algorithm>
+#include <iostream>
 #include "Decrypter.h"
 
 using namespace std;
@@ -27,6 +27,8 @@ Decrypter::Decrypter(vector<string> pswToCrack, string salt) {
 
     this->saltpsw = salt;
 
+    //read and store the dictionary in a vector
+
     ifstream file;
     file.open("psw.txt");
 
@@ -39,13 +41,16 @@ Decrypter::Decrypter(vector<string> pswToCrack, string salt) {
     file.close();
 
 }
+
+//utility functions to get mean and median from a vector of times
+
 float Decrypter::getMedian(vector<float> values)
 {
     size_t size = values.size();
 
     if (size == 0)
     {
-        return 0;  // Undefined, really.
+        return 0;
     }
     else
     {
@@ -60,6 +65,7 @@ float Decrypter::getMedian(vector<float> values)
         }
     }
 }
+
 float Decrypter::getMean(vector<float> values) {
     float sum = 0;
 
@@ -68,6 +74,8 @@ float Decrypter::getMean(vector<float> values) {
     }
     return sum / values.size();
 }
+
+//sequential version
 
 vector<long> Decrypter::sequentialDecryption(int runs)  {
 
@@ -84,20 +92,17 @@ vector<long> Decrypter::sequentialDecryption(int runs)  {
 
             for (string& password : dictionaryPSW) {
                 string pswEncrypted(crypt(password.c_str(), saltpsw.c_str()));
-                //cout << pswEncrypted << endl;
 
                 if (pswToCrack == pswEncrypted) {
-                    //cout << "Generated : " << pswEncrypted << endl;
-                    //cout << "Target : " << pswToCrack << endl;
+                    //cout << "Encryption  attempt : " << pswEncrypted << endl;
+                    //cout << "Target encrypted : " << pswToCrack << endl;
                     //cout << "Password FOUND : " << password << endl;
                     break;
                 }
             }
 
-
-
             auto end = chrono::steady_clock::now();
-            auto elapsed_time = chrono::duration_cast<chrono::microseconds>(end - start).count();
+            auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end - start).count();
             singleRunTimes += elapsed_time;
         }
 
@@ -107,35 +112,43 @@ vector<long> Decrypter::sequentialDecryption(int runs)  {
     return times;
 }
 
+//parallel version
 
 vector <long> Decrypter::parallelDecryption(int runs, int nThreads) {
 
-
+    string pswToCrack;
     vector<long> times;
     times.reserve(encryptedPasswords.size());
     long singleRunTimes = 0;
+    vector <string> dictPSW = dictionaryPSW;
 
-    for (string &pswToCrack : encryptedPasswords) {
+    for (int j = 0; j < encryptedPasswords.size(); j++) {
+        pswToCrack = encryptedPasswords[j];
         singleRunTimes = 0;
 
         for (int i = 0; i < runs; i++) {
 
-            int workloadThread = static_cast<int>(ceil((double) dictionaryPSW.size() / (double) nThreads));
+            int workloadThread = static_cast<int>(ceil((double) dictPSW.size() / (double) nThreads));
             volatile bool found = false;
             auto start = chrono::steady_clock::now();
-            #pragma omp parallel num_threads(nThreads) shared(found)
+            #pragma omp parallel default(none) num_threads(nThreads) shared(found,workloadThread,pswToCrack,dictPSW)
             {
                 int threadID = omp_get_thread_num();
                 struct crypt_data data;
                 data.initialized = 0;
 
                 for (int pswID = threadID * workloadThread; pswID < (threadID + 1) * workloadThread; pswID++) {
-                    if (pswID < dictionaryPSW.size() && !found) {
-                        char *pswEncrypted = crypt_r(dictionaryPSW[pswID].c_str(), saltpsw.c_str(), &data);
+                    if (pswID < dictPSW.size() && !found) {
+                        char *pswEncrypted = crypt_r(dictPSW[pswID].c_str(), saltpsw.c_str(), &data);
                         if (pswToCrack == string(pswEncrypted)) {
-                            //cout << "Generated : " << pswEncrypted;
-                            //cout << "Target : " << pswToCrack << endl;
-                            //cout << "Password FOUND : " << dictionaryPSW[pswID] << endl;
+
+                            //printf("Encryption attempt: : %s\n",pswEncrypted);
+                            //printf( "Target encrypted : %s\n" ,pswToCrack.c_str());
+                            //printf( "Password FOUND : %s\n",  dictionaryPSW[pswID].c_str());
+
+
+                            //found flag assigned to true to redirect other threads in the else-break section
+
                             found = true;
                             break;
 
@@ -149,9 +162,8 @@ vector <long> Decrypter::parallelDecryption(int runs, int nThreads) {
 
             }
 
-
             auto end = chrono::steady_clock::now();
-            auto elapsed_time = chrono::duration_cast<chrono::microseconds>(end - start).count();
+            auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end - start).count();
             singleRunTimes += elapsed_time;
 
         }
@@ -163,6 +175,8 @@ vector <long> Decrypter::parallelDecryption(int runs, int nThreads) {
 
 }
 
+//function to simply calculate speedups from times vectors
+
 vector<float> Decrypter::calcSpeedup(vector<long> sequentialTimes, vector<long> parallelTimes) {
     vector<float> speedups;
     speedups.reserve(sequentialTimes.size());
@@ -173,3 +187,7 @@ vector<float> Decrypter::calcSpeedup(vector<long> sequentialTimes, vector<long> 
 
     return speedups;
 }
+
+
+
+

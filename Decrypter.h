@@ -1,5 +1,5 @@
 //
-// Created by Emanuele on 21/12/2019.
+// Created by Emanuele on 11/12/2019.
 //
 
 #ifndef PSWDECRYPTER_DECRYPTER_H
@@ -19,10 +19,11 @@ public:
     vector<float> calcSpeedup(vector<long> sequentialTimes, vector<long> parallelTimes);
     float getMean(vector<float> values);
     float getMedian(vector<float> values);
+    vector<string> dictionaryPSW;
 
 private:
     vector<string> encryptedPasswords;
-    vector<string> dictionaryPSW;
     string saltpsw;
 };
+
 #endif //PSWDECRYPTER_DECRYPTER_H

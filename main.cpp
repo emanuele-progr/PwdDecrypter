@@ -1,14 +1,16 @@
 #include <iostream>
 #include <vector>
-#include <iomanip>
 #include <unistd.h>
-#include <algorithm>
+#include <iomanip>
 #include "Decrypter.h"
-
 
 using namespace std;
 
+void testAndCompare(vector <string> pswToCrack, int runs, vector <int> nThreads);
+
 int main(){
+
+    //read text file of random dictionary words and store in a vector
 
     string line;
     ifstream file;
@@ -19,15 +21,36 @@ int main(){
     }
     file.close();
 
-    //vector<string> pswToCrack = { "1212MARI"};
-    vector<int> nThreads = {2, 3, 4, 5, 6, 7, 8, 9, 10, 50, 100, 500, 1000,3000, 5000, 7000, 10000};
+    //vector<string> pswToCrack = { "sauske00"};
+    vector<int> nThreads = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 32};
     int runs = 1;
+    /*
+    string saltpsw = "username";
+    Decrypter Decrypter(pswToCrack, saltpsw);
+    Decrypter.sequentialDecryption(runs);
+    Decrypter.parallelDecryption(runs, 3);
+    */
+
+    testAndCompare(pswToCrack,runs,nThreads);
+
+
+}
+
+
+void testAndCompare(vector <string> pswToCrack, int runs, vector <int> nThreads){
+
     vector<long> sequentialTimes, parallelTimes;
     vector<float> speedupsVector;
     vector<float> singleWordSpeedUp;
     string saltpsw = "username";
     Decrypter Decrypter(pswToCrack, saltpsw);
-    sequentialTimes = Decrypter.sequentialDecryption(1);
+
+    //sequential time calculation
+
+    sequentialTimes = Decrypter.sequentialDecryption(runs);
+
+    //cycle to test different # threads and speedup calculation
+
     for(int threads : nThreads) {
 
         parallelTimes = Decrypter.parallelDecryption(runs, threads);
@@ -38,19 +61,22 @@ int main(){
         for(int i=0; i < pswToCrack.size(); i++ ){
 
             cout << "Password to decrypt : " << pswToCrack[i];
-            cout << "  sequential time : " << sequentialTimes[i] << " μs "<< "  parallel time : " << parallelTimes[i] << " μs "<< endl;
+            cout << "  sequential time : " << sequentialTimes[i] << " ms "<< "  parallel time : " << parallelTimes[i] << " ms "<< endl;
             cout << "Number of runs : " << runs << endl ;
             cout << "SPEEDUP : " << fixed << setprecision(5) << speedupsVector[i] << endl;
             cout << "-------------------------------------------------------------------------------"<< endl;
         }
         usleep(5000);
-        //singleWordSpeedUp.push_back(speedupsVector[0]);
-        singleWordSpeedUp.push_back(Decrypter.getMedian(speedupsVector));
+
+        //singleWordSpeedUp.push_back(Decrypter.getMedian(speedupsVector));
+        singleWordSpeedUp.push_back(Decrypter.getMean(speedupsVector));
     }
 
 
+    //cycle to output a summary of speedup values
 
     for(int i=0; i < singleWordSpeedUp.size(); i++){
+
         cout << singleWordSpeedUp[i] << endl;
     }
 
