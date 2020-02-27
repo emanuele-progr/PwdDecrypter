@@ -25,7 +25,7 @@ int main(){
     vector<int> nThreads = {2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 32};
     int runs = 1;
     /*
-    string saltpsw = "username";
+    string saltpsw = "st";
     Decrypter Decrypter(pswToCrack, saltpsw);
     Decrypter.sequentialDecryption(runs);
     Decrypter.parallelDecryption(runs, 3);
@@ -42,7 +42,7 @@ void testAndCompare(vector <string> pswToCrack, int runs, vector <int> nThreads)
     vector<long> sequentialTimes, parallelTimes;
     vector<float> speedupsVector;
     vector<float> singleWordSpeedUp;
-    string saltpsw = "username";
+    string saltpsw = "st";
     Decrypter Decrypter(pswToCrack, saltpsw);
 
     //sequential time calculation
